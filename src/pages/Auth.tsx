@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrendingUp, Mail, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getUserFriendlyError } from '@/lib/errorMessages';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -39,7 +40,7 @@ export default function Auth() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message,
+        description: getUserFriendlyError(error),
         variant: 'destructive',
       });
     } finally {

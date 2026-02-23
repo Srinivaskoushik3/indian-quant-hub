@@ -9,6 +9,7 @@ import { Plus, Trash2, TrendingUp, TrendingDown, Star, BarChart3 } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { getUserFriendlyError, isValidStockSymbol } from '@/lib/errorMessages';
 
 interface WatchlistItem {
   id: string;
@@ -58,10 +59,14 @@ export default function Portfolio() {
 
   const addToWatchlist = async () => {
     if (!addSymbol || !user) return;
+    if (!isValidStockSymbol(addSymbol)) {
+      toast({ title: 'Invalid symbol', description: 'Please select a valid stock.', variant: 'destructive' });
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.from('watchlist').insert({ user_id: user.id, stock_symbol: addSymbol });
     if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: getUserFriendlyError(error), variant: 'destructive' });
     } else {
       toast({ title: 'Added', description: `${addSymbol.replace('.NS', '')} added to watchlist` });
       setAddSymbol('');
@@ -77,7 +82,7 @@ export default function Portfolio() {
   };
 
   const logTrade = async (symbol: string) => {
-    if (!user) return;
+    if (!user || !isValidStockSymbol(symbol)) return;
     const data = generateMockData(symbol);
     const sma50 = calculateSMA(data.closes, 50);
     const sma200 = calculateSMA(data.closes, 200);
