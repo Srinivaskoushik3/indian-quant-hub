@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 const navItems = [
   { label: 'Dashboard', path: '/', icon: BarChart3 },
   { label: 'Portfolio', path: '/portfolio', icon: Briefcase },
+  { label: 'Tax', path: '/tax', icon: TrendingUp },
   { label: 'Settings', path: '/settings', icon: Settings },
 ];
 
