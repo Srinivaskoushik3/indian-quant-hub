@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      dashboard_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          ux_mode: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          ux_mode?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          ux_mode?: string
+        }
+        Relationships: []
+      }
+      dividend_records: {
+        Row: {
+          created_at: string
+          dividend_amount: number
+          dividend_yield: number | null
+          ex_date: string | null
+          id: string
+          payment_date: string | null
+          stock_symbol: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dividend_amount?: number
+          dividend_yield?: number | null
+          ex_date?: string | null
+          id?: string
+          payment_date?: string | null
+          stock_symbol: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dividend_amount?: number
+          dividend_yield?: number | null
+          ex_date?: string | null
+          id?: string
+          payment_date?: string | null
+          stock_symbol?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -31,6 +88,54 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tax_simulations: {
+        Row: {
+          buy_date: string
+          buy_price: number
+          created_at: string
+          id: string
+          ltcg: number | null
+          net_profit: number | null
+          quantity: number
+          sell_date: string
+          sell_price: number
+          stcg: number | null
+          stock_symbol: string
+          tax_liability: number | null
+          user_id: string
+        }
+        Insert: {
+          buy_date: string
+          buy_price: number
+          created_at?: string
+          id?: string
+          ltcg?: number | null
+          net_profit?: number | null
+          quantity: number
+          sell_date: string
+          sell_price: number
+          stcg?: number | null
+          stock_symbol: string
+          tax_liability?: number | null
+          user_id: string
+        }
+        Update: {
+          buy_date?: string
+          buy_price?: number
+          created_at?: string
+          id?: string
+          ltcg?: number | null
+          net_profit?: number | null
+          quantity?: number
+          sell_date?: string
+          sell_price?: number
+          stcg?: number | null
+          stock_symbol?: string
+          tax_liability?: number | null
           user_id?: string
         }
         Relationships: []
@@ -80,6 +185,48 @@ export type Database = {
           id?: string
           stock_symbol?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_snapshots: {
+        Row: {
+          best_stock: string | null
+          created_at: string
+          id: string
+          portfolio_volatility: number | null
+          sharpe_ratio: number | null
+          snapshot_data: Json | null
+          total_return: number | null
+          user_id: string
+          week_end: string
+          week_start: string
+          worst_stock: string | null
+        }
+        Insert: {
+          best_stock?: string | null
+          created_at?: string
+          id?: string
+          portfolio_volatility?: number | null
+          sharpe_ratio?: number | null
+          snapshot_data?: Json | null
+          total_return?: number | null
+          user_id: string
+          week_end: string
+          week_start: string
+          worst_stock?: string | null
+        }
+        Update: {
+          best_stock?: string | null
+          created_at?: string
+          id?: string
+          portfolio_volatility?: number | null
+          sharpe_ratio?: number | null
+          snapshot_data?: Json | null
+          total_return?: number | null
+          user_id?: string
+          week_end?: string
+          week_start?: string
+          worst_stock?: string | null
         }
         Relationships: []
       }

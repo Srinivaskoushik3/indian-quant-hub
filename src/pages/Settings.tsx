@@ -4,17 +4,25 @@ import Navbar from '@/components/Navbar';
 import Disclaimer from '@/components/Disclaimer';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { User, LogOut, Shield, Bell, Palette, Info } from 'lucide-react';
+import { User, LogOut, Shield, Bell, Palette, Info, Monitor, Zap, Sun, Moon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
+import { useTheme, type UXMode } from '@/contexts/ThemeContext';
+
+const modeOptions: { mode: UXMode; label: string; description: string; icon: typeof Monitor }[] = [
+  { mode: 'beginner', label: 'Beginner', description: 'Simplified charts, helpful tooltips', icon: Info },
+  { mode: 'pro', label: 'Pro', description: 'Compact layout, advanced metrics', icon: Zap },
+  { mode: 'dark', label: 'Dark', description: 'Premium dark gradient theme', icon: Moon },
+  { mode: 'light', label: 'Light', description: 'Clean white theme', icon: Sun },
+];
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
   const [notifications, setNotifications] = useState(true);
-  const [compactView, setCompactView] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { mode, setMode } = useTheme();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -71,6 +79,35 @@ export default function SettingsPage() {
       ),
     },
     {
+      icon: Palette,
+      title: 'Dashboard Mode',
+      description: 'Switch between UX modes',
+      content: (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {modeOptions.map(opt => {
+            const isActive = mode === opt.mode;
+            return (
+              <button
+                key={opt.mode}
+                onClick={() => setMode(opt.mode)}
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all ${
+                  isActive
+                    ? 'bg-primary/10 border border-primary/30 text-primary'
+                    : 'bg-secondary/30 border border-transparent text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                }`}
+              >
+                <opt.icon className="h-5 w-5" />
+                <div>
+                  <p className="text-sm font-semibold">{opt.label}</p>
+                  <p className="text-[11px] opacity-70">{opt.description}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      ),
+    },
+    {
       icon: Bell,
       title: 'Notifications',
       description: 'Configure alert preferences',
@@ -89,22 +126,6 @@ export default function SettingsPage() {
               <p className="text-xs text-muted-foreground">Notify on significant price movements</p>
             </div>
             <Switch checked={true} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      icon: Palette,
-      title: 'Display',
-      description: 'Customize your experience',
-      content: (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between rounded-xl bg-secondary/30 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-foreground">Compact View</p>
-              <p className="text-xs text-muted-foreground">Reduce spacing for denser data display</p>
-            </div>
-            <Switch checked={compactView} onCheckedChange={setCompactView} />
           </div>
         </div>
       ),
@@ -133,7 +154,7 @@ export default function SettingsPage() {
         <div className="space-y-3">
           <div className="flex items-center justify-between rounded-xl bg-secondary/30 px-4 py-3">
             <span className="text-sm text-muted-foreground">Version</span>
-            <span className="font-mono text-sm text-foreground">1.0.0</span>
+            <span className="font-mono text-sm text-foreground">2.0.0</span>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-secondary/30 px-4 py-3">
             <span className="text-sm text-muted-foreground">Strategy</span>
@@ -176,7 +197,6 @@ export default function SettingsPage() {
           </motion.div>
         ))}
 
-        {/* Sign Out */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           <Button onClick={handleSignOut} variant="outline" className="w-full border-destructive/30 text-destructive hover:bg-destructive/10">
             <LogOut className="mr-2 h-4 w-4" /> Sign Out

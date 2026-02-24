@@ -55,6 +55,70 @@
     --sidebar-border: 220 20% 18%;
     --sidebar-ring: 142 71% 45%;
   }
+
+  /* Light mode */
+  .theme-light {
+    --background: 0 0% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 142 71% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 93%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 199 89% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 87%;
+    --input: 220 13% 87%;
+    --ring: 142 71% 35%;
+
+    --success: 142 71% 35%;
+    --warning: 38 92% 45%;
+    --hold: 199 89% 40%;
+
+    --glass-bg: 0 0% 100% / 0.8;
+    --glass-border: 220 13% 87% / 0.8;
+    --glow-primary: 142 71% 35% / 0.1;
+    --glow-accent: 199 89% 40% / 0.1;
+    --glow-destructive: 0 72% 51% / 0.1;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 142 71% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 93%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 220 13% 87%;
+    --sidebar-ring: 142 71% 35%;
+  }
+
+  .theme-light .gradient-bg {
+    background: linear-gradient(180deg, hsl(220 20% 97%), hsl(0 0% 98%)) !important;
+  }
+
+  .theme-light .glass-card {
+    background: hsl(0 0% 100% / 0.8) !important;
+    border-color: hsl(220 13% 87% / 0.8) !important;
+    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.05);
+  }
+
+  .theme-light .neon-line {
+    background: linear-gradient(90deg, transparent, hsl(142 71% 35% / 0.3), transparent) !important;
+  }
 }
 
 @layer base {
