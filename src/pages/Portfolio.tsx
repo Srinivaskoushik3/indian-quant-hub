@@ -2,12 +2,14 @@ import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Disclaimer from '@/components/Disclaimer';
-import { INDIAN_STOCKS, generateMockData } from '@/lib/stockData';
+import { INDIAN_STOCKS } from '@/lib/stockData';
 import { calculateSMA, calculateRSI, getRecommendation, calculateTotalReturn } from '@/lib/indicators';
 import { computeAllocations, computeSectorAllocation, computeMarketCapAllocation, computeRiskContributions, computeDiversificationScore, generateSmartInsights } from '@/lib/portfolioAnalytics';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Trash2, TrendingUp, TrendingDown, Star, BarChart3, PieChart, Shield, Lightbulb, DollarSign, FileText } from 'lucide-react';
+import { useMultiStockData } from '@/hooks/useStockData';
+import { Plus, Trash2, TrendingUp, TrendingDown, Star, BarChart3, PieChart, Shield, Lightbulb, DollarSign, FileText, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -101,26 +103,31 @@ export default function Portfolio() {
 
   const logTrade = async (symbol: string) => {
     if (!user || !isValidStockSymbol(symbol)) return;
-    const data = generateMockData(symbol);
-    const sma50 = calculateSMA(data.closes, 50);
-    const sma200 = calculateSMA(data.closes, 200);
-    const rsi = calculateRSI(data.closes);
-    const lastIdx = data.closes.length - 1;
+    const stockData = stockDataMap.get(symbol);
+    if (!stockData) return;
+    const sma50 = calculateSMA(stockData.closes, 50);
+    const sma200 = calculateSMA(stockData.closes, 200);
+    const rsi = calculateRSI(stockData.closes);
+    const lastIdx = stockData.closes.length - 1;
     const rec = getRecommendation(sma50[lastIdx], sma200[lastIdx], rsi[lastIdx]);
     
     await supabase.from('trade_logs').insert({
       user_id: user.id,
       stock_symbol: symbol,
       recommendation: rec,
-      price: data.closes[lastIdx],
+      price: stockData.closes[lastIdx],
     });
     fetchTradeLogs();
     toast({ title: 'Logged', description: `${rec} signal for ${symbol.replace('.NS', '')} recorded` });
   };
 
+  const symbols = useMemo(() => watchlist.map(w => w.stock_symbol), [watchlist]);
+  const { dataMap: stockDataMap, loading: stocksLoading, isLive } = useMultiStockData(symbols);
+
   const watchlistAnalysis = useMemo(() => {
     return watchlist.map(item => {
-      const data = generateMockData(item.stock_symbol);
+      const data = stockDataMap.get(item.stock_symbol);
+      if (!data || data.closes.length < 2) return { ...item, price: 0, change: 0, recommendation: 'HOLD' as const, totalReturn: 0 };
       const closes = data.closes;
       const lastIdx = closes.length - 1;
       const sma50 = calculateSMA(closes, 50);
@@ -130,9 +137,9 @@ export default function Portfolio() {
       const totalReturn = calculateTotalReturn(closes);
       return { ...item, price: closes[lastIdx], change: ((closes[lastIdx] - closes[lastIdx - 1]) / closes[lastIdx - 1]) * 100, recommendation: rec, totalReturn };
     });
-  }, [watchlist]);
+  }, [watchlist, stockDataMap]);
 
-  const symbols = useMemo(() => watchlist.map(w => w.stock_symbol), [watchlist]);
+  // symbols already defined above with useMultiStockData
 
   // Portfolio analytics
   const allocations = useMemo(() => computeAllocations(symbols), [symbols]);
@@ -166,7 +173,14 @@ export default function Portfolio() {
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-2xl font-bold text-foreground">Portfolio Intelligence</h1>
-          <p className="text-sm text-muted-foreground">Analytics · Allocation · Insights</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">Analytics · Allocation · Insights</p>
+            {symbols.length > 0 && (
+              <Badge variant="outline" className={`text-xs ${isLive ? 'border-success/30 text-success' : 'border-muted text-muted-foreground'}`}>
+                {isLive ? <><Wifi className="mr-1 h-3 w-3" /> Live</> : <><WifiOff className="mr-1 h-3 w-3" /> Mock</>}
+              </Badge>
+            )}
+          </div>
         </motion.div>
 
         <div className="neon-line" />
