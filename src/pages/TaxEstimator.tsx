@@ -1,23 +1,67 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Disclaimer from '@/components/Disclaimer';
 import { calculateCapitalGainsTax, type TaxInput } from '@/lib/taxCalculator';
+import { INDIAN_STOCKS } from '@/lib/stockData';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { Calculator, AlertTriangle, IndianRupee, TrendingUp, Calendar } from 'lucide-react';
+import { Calculator, AlertTriangle, IndianRupee, TrendingUp, Calendar, Save, History, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface SavedSimulation {
+  id: string;
+  stock_symbol: string;
+  buy_price: number;
+  sell_price: number;
+  quantity: number;
+  buy_date: string;
+  sell_date: string;
+  stcg: number | null;
+  ltcg: number | null;
+  tax_liability: number | null;
+  net_profit: number | null;
+  created_at: string;
+}
 
 export default function TaxEstimator() {
-  const [form, setForm] = useState<TaxInput>({
+  const [form, setForm] = useState<TaxInput & { stockSymbol: string }>({
     buyPrice: 0,
     sellPrice: 0,
     quantity: 1,
     buyDate: '2025-01-01',
     sellDate: '2026-02-24',
+    stockSymbol: 'RELIANCE.NS',
   });
   const [result, setResult] = useState<ReturnType<typeof calculateCapitalGainsTax> | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [history, setHistory] = useState<SavedSimulation[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null));
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (user) fetchHistory();
+  }, [user]);
+
+  const fetchHistory = async () => {
+    const { data } = await supabase
+      .from('tax_simulations')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (data) setHistory(data);
+  };
 
   const handleCalculate = () => {
     if (form.buyPrice <= 0 || form.sellPrice <= 0 || form.quantity <= 0) return;
@@ -25,10 +69,60 @@ export default function TaxEstimator() {
     setResult(calculateCapitalGainsTax(form));
   };
 
-  const updateField = (field: keyof TaxInput, value: string) => {
+  const handleSave = async () => {
+    if (!result || !user) return;
+    setSaving(true);
+    const { error } = await supabase.from('tax_simulations').insert({
+      user_id: user.id,
+      stock_symbol: form.stockSymbol,
+      buy_price: form.buyPrice,
+      sell_price: form.sellPrice,
+      quantity: form.quantity,
+      buy_date: form.buyDate,
+      sell_date: form.sellDate,
+      stcg: result.stcg,
+      ltcg: result.ltcg,
+      tax_liability: result.totalTax,
+      net_profit: result.netProfit,
+    });
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to save simulation', variant: 'destructive' });
+    } else {
+      toast({ title: 'Saved', description: 'Tax simulation saved to your history' });
+      fetchHistory();
+    }
+    setSaving(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    await supabase.from('tax_simulations').delete().eq('id', id);
+    setHistory(prev => prev.filter(h => h.id !== id));
+    toast({ title: 'Deleted', description: 'Simulation removed' });
+  };
+
+  const loadSimulation = (sim: SavedSimulation) => {
+    setForm({
+      buyPrice: sim.buy_price,
+      sellPrice: sim.sell_price,
+      quantity: sim.quantity,
+      buyDate: sim.buy_date,
+      sellDate: sim.sell_date,
+      stockSymbol: sim.stock_symbol,
+    });
+    setResult(calculateCapitalGainsTax({
+      buyPrice: sim.buy_price,
+      sellPrice: sim.sell_price,
+      quantity: sim.quantity,
+      buyDate: sim.buy_date,
+      sellDate: sim.sell_date,
+    }));
+    setShowHistory(false);
+  };
+
+  const updateField = (field: keyof TaxInput | 'stockSymbol', value: string) => {
     setForm(prev => ({
       ...prev,
-      [field]: field === 'buyDate' || field === 'sellDate' ? value : Math.max(0, parseFloat(value) || 0),
+      [field]: field === 'buyDate' || field === 'sellDate' || field === 'stockSymbol' ? value : Math.max(0, parseFloat(value) || 0),
     }));
   };
 
@@ -36,12 +130,51 @@ export default function TaxEstimator() {
     <div className="gradient-bg min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-2xl font-bold text-foreground">Capital Gains Tax Estimator</h1>
-          <p className="text-sm text-muted-foreground">Indian Equity · STCG & LTCG Calculator</p>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Capital Gains Tax Estimator</h1>
+            <p className="text-sm text-muted-foreground">Indian Equity · STCG & LTCG Calculator</p>
+          </div>
+          {user && (
+            <Button variant="outline" size="sm" onClick={() => setShowHistory(!showHistory)} className="border-border text-muted-foreground hover:bg-secondary hover:text-foreground">
+              <History className="mr-1.5 h-4 w-4" /> History ({history.length})
+            </Button>
+          )}
         </motion.div>
 
         <div className="neon-line" />
+
+        {/* History panel */}
+        <AnimatePresence>
+          {showHistory && history.length > 0 && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="glass-card overflow-hidden">
+              <div className="p-4">
+                <h3 className="mb-3 text-sm font-semibold text-foreground">Saved Simulations</h3>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {history.map(sim => (
+                    <div key={sim.id} className="flex items-center justify-between rounded-lg bg-secondary/30 px-4 py-3 text-sm transition-colors hover:bg-secondary/50">
+                      <button onClick={() => loadSimulation(sim)} className="flex-1 text-left">
+                        <span className="font-mono font-medium text-primary">{sim.stock_symbol.replace('.NS', '')}</span>
+                        <span className="ml-3 text-muted-foreground">
+                          ₹{sim.buy_price} → ₹{sim.sell_price} × {sim.quantity}
+                        </span>
+                        <span className={`ml-3 font-mono font-semibold ${(sim.net_profit ?? 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                          ₹{sim.net_profit?.toLocaleString('en-IN') ?? '0'}
+                        </span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {new Date(sim.created_at).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
+                        </span>
+                      </button>
+                      <button onClick={() => handleDelete(sim.id)} className="ml-2 rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Input Form */}
@@ -51,6 +184,22 @@ export default function TaxEstimator() {
               <h3 className="text-sm font-semibold text-foreground">Trade Details</h3>
             </div>
             <div className="space-y-4">
+              <div>
+                <Label className="text-xs text-muted-foreground">Stock</Label>
+                <Select value={form.stockSymbol} onValueChange={v => updateField('stockSymbol', v)}>
+                  <SelectTrigger className="mt-1 border-border bg-secondary/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="glass-card border-border bg-card">
+                    {INDIAN_STOCKS.map(s => (
+                      <SelectItem key={s.symbol} value={s.symbol}>
+                        <span className="font-mono text-primary">{s.symbol.replace('.NS', '')}</span>
+                        <span className="ml-2 text-muted-foreground">{s.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label className="text-xs text-muted-foreground">Buy Price (₹)</Label>
@@ -75,16 +224,22 @@ export default function TaxEstimator() {
                   <Input type="date" value={form.sellDate} onChange={e => updateField('sellDate', e.target.value)} className="mt-1 border-border bg-secondary/50 font-mono" />
                 </div>
               </div>
-              <Button onClick={handleCalculate} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                <Calculator className="mr-2 h-4 w-4" /> Calculate Tax
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={handleCalculate} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Calculator className="mr-2 h-4 w-4" /> Calculate
+                </Button>
+                {result && user && (
+                  <Button onClick={handleSave} disabled={saving} variant="outline" className="border-border text-muted-foreground hover:bg-secondary hover:text-foreground">
+                    <Save className="mr-1.5 h-4 w-4" /> {saving ? 'Saving...' : 'Save'}
+                  </Button>
+                )}
+              </div>
             </div>
           </motion.div>
 
           {/* Results */}
           {result && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
-              {/* Tax warning */}
               {result.taxImpactPercent > 20 && (
                 <div className="glass-card flex items-center gap-3 border-warning/30 bg-warning/5 p-4">
                   <AlertTriangle className="h-5 w-5 shrink-0 text-warning" />
@@ -94,7 +249,6 @@ export default function TaxEstimator() {
                 </div>
               )}
 
-              {/* Summary cards */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="glass-card p-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
@@ -135,7 +289,6 @@ export default function TaxEstimator() {
                 </div>
               </div>
 
-              {/* Tax breakdown */}
               <div className="glass-card p-6">
                 <h4 className="mb-4 text-sm font-semibold text-foreground">Tax Breakdown</h4>
                 <div className="space-y-2 text-sm">
@@ -160,7 +313,6 @@ export default function TaxEstimator() {
                 </div>
               </div>
 
-              {/* Visual breakdown */}
               {result.grossProfit > 0 && (
                 <div className="glass-card p-6">
                   <h4 className="mb-4 text-sm font-semibold text-foreground">Tax Impact Visual</h4>
