@@ -71,6 +71,66 @@ export type Database = {
         }
         Relationships: []
       }
+      monte_carlo_snapshots: {
+        Row: {
+          best_5pct: number | null
+          confidence_level: number
+          created_at: string
+          cvar_95: number | null
+          id: string
+          initial_value: number | null
+          max_drawdown_mean: number | null
+          median_return: number | null
+          prob_negative: number | null
+          simulation_count: number
+          simulation_params: Json | null
+          symbols: string[]
+          time_horizon: number
+          user_id: string
+          var_95: number | null
+          var_99: number | null
+          worst_5pct: number | null
+        }
+        Insert: {
+          best_5pct?: number | null
+          confidence_level?: number
+          created_at?: string
+          cvar_95?: number | null
+          id?: string
+          initial_value?: number | null
+          max_drawdown_mean?: number | null
+          median_return?: number | null
+          prob_negative?: number | null
+          simulation_count?: number
+          simulation_params?: Json | null
+          symbols: string[]
+          time_horizon?: number
+          user_id: string
+          var_95?: number | null
+          var_99?: number | null
+          worst_5pct?: number | null
+        }
+        Update: {
+          best_5pct?: number | null
+          confidence_level?: number
+          created_at?: string
+          cvar_95?: number | null
+          id?: string
+          initial_value?: number | null
+          max_drawdown_mean?: number | null
+          median_return?: number | null
+          prob_negative?: number | null
+          simulation_count?: number
+          simulation_params?: Json | null
+          symbols?: string[]
+          time_horizon?: number
+          user_id?: string
+          var_95?: number | null
+          var_99?: number | null
+          worst_5pct?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

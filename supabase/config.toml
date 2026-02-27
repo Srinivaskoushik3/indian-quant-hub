@@ -2,3 +2,9 @@ project_id = "chechlmjjdnktzwoqqxk"
 
 [functions.yahoo-finance]
 verify_jwt = false
+
+[functions.monte-carlo]
+verify_jwt = false
+
+[functions.ml-predict]
+verify_jwt = false
