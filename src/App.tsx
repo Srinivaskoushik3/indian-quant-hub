@@ -9,6 +9,8 @@ import Auth from "./pages/Auth";
 import Portfolio from "./pages/Portfolio";
 import Settings from "./pages/Settings";
 import TaxEstimator from "./pages/TaxEstimator";
+import MonteCarloLab from "./pages/MonteCarloLab";
+import MLPredictions from "./pages/MLPredictions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/tax" element={<TaxEstimator />} />
+            <Route path="/monte-carlo" element={<MonteCarloLab />} />
+            <Route path="/ml-predictions" element={<MLPredictions />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

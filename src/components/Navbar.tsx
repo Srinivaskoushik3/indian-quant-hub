@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, BarChart3, Briefcase, Settings, User, Menu, X } from 'lucide-react';
+import { TrendingUp, BarChart3, Briefcase, Settings, User, Menu, X, Activity, Brain } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 const navItems = [
   { label: 'Dashboard', path: '/', icon: BarChart3 },
   { label: 'Portfolio', path: '/portfolio', icon: Briefcase },
+  { label: 'Risk Lab', path: '/monte-carlo', icon: Activity },
+  { label: 'AI Predict', path: '/ml-predictions', icon: Brain },
   { label: 'Tax', path: '/tax', icon: TrendingUp },
   { label: 'Settings', path: '/settings', icon: Settings },
 ];
