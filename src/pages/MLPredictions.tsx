@@ -74,7 +74,7 @@ export default function MLPredictions() {
       toast({ title: 'AI Analysis Complete', description: `Prediction generated for ${selectedSymbol.replace('.NS', '')}` });
     } catch (err: any) {
       console.error(err);
-      toast({ title: 'AI Error', description: err.message || 'Failed to get AI prediction', variant: 'destructive' });
+      toast({ title: 'AI Error', description: 'Failed to get AI prediction. Please try again.', variant: 'destructive' });
     } finally {
       setAiLoading(false);
     }
