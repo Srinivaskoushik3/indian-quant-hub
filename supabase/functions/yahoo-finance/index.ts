@@ -5,16 +5,52 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+const validRanges = ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y'];
+const validIntervals = ['1d', '1wk', '1mo'];
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Auth check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
+    if (authError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { symbol, range = '1y', interval = '1d' } = await req.json();
 
-    if (!symbol || typeof symbol !== 'string') {
-      return new Response(JSON.stringify({ error: 'Missing or invalid symbol' }), {
+    // Validate symbol format (Indian NSE stocks only)
+    if (!symbol || typeof symbol !== 'string' || !/^[A-Z]+\.NS$/.test(symbol) || symbol.length > 20) {
+      return new Response(JSON.stringify({ error: 'Invalid symbol format' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate range and interval
+    if (!validRanges.includes(range) || !validIntervals.includes(interval)) {
+      return new Response(JSON.stringify({ error: 'Invalid range or interval' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -31,14 +67,18 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`Yahoo Finance API error [${response.status}]: ${text}`);
+      console.error(`Yahoo Finance API error [${response.status}]: ${text}`);
+      return new Response(JSON.stringify({ error: 'Failed to fetch stock data. Please try again.' }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const json = await response.json();
     const result = json?.chart?.result?.[0];
 
     if (!result) {
-      return new Response(JSON.stringify({ error: 'No data returned for symbol', symbol }), {
+      return new Response(JSON.stringify({ error: 'No data returned for symbol' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -55,7 +95,6 @@ Deno.serve(async (req) => {
     const volumes: number[] = [];
 
     for (let i = 0; i < timestamps.length; i++) {
-      // Skip null data points
       if (quote.close?.[i] == null) continue;
       
       const d = new Date(timestamps[i] * 1000);
@@ -85,8 +124,7 @@ Deno.serve(async (req) => {
     });
   } catch (error: unknown) {
     console.error('Yahoo Finance fetch error:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({ error: 'Failed to fetch stock data. Please try again.' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

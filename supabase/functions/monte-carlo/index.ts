@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,11 +13,42 @@ function randn(): number {
   return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Auth check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
+    if (authError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { initialValue, mu, sigma, simCount, horizon } = await req.json();
+
+    // Validate numeric inputs
+    if (typeof initialValue !== 'number' || typeof mu !== 'number' || typeof sigma !== 'number' ||
+        typeof simCount !== 'number' || typeof horizon !== 'number' ||
+        initialValue <= 0 || simCount < 1 || simCount > 10000 || horizon < 1 || horizon > 504) {
+      return new Response(JSON.stringify({ error: 'Invalid simulation parameters' }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
     const dt = 1 / 252;
     const drift = (mu - 0.5 * sigma * sigma) * dt;
@@ -58,7 +89,6 @@ serve(async (req) => {
     
     const worst5 = sortedReturns.slice(0, pIdx(0.05));
     
-    // Percentile paths
     const p5: number[] = [], p50: number[] = [], p95: number[] = [];
     for (let d = 0; d <= horizon; d++) {
       const dv = [...allDaily[d]].sort((a, b) => a - b);
@@ -89,7 +119,7 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("monte-carlo error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Simulation failed. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

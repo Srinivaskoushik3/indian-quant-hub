@@ -120,7 +120,7 @@ export default function MonteCarloLab() {
       initial_value: portfolioParams.currentValue,
     });
     if (error) {
-      toast({ title: 'Save failed', description: String(error.message), variant: 'destructive' });
+      toast({ title: 'Save failed', description: 'Could not save snapshot. Please try again.', variant: 'destructive' });
     } else {
       toast({ title: 'Saved', description: 'Snapshot saved to database' });
     }
