@@ -79,14 +79,34 @@ export default function MonteCarloLab() {
         },
       });
       if (error) throw error;
-      // Transform server response to SimulationResult format
+      // Server returns percentiles only at sampled days - interpolate to full horizon
+      const serverP5 = data.percentilePaths.p5 as number[];
+      const serverP50 = data.percentilePaths.p50 as number[];
+      const serverP95 = data.percentilePaths.p95 as number[];
+      const pDays: number[] = data.percentileDays || serverP5.map((_: number, i: number) => i);
+      
+      // Build full-length percentile arrays by linear interpolation
+      const interpFull = (sparse: number[]) => {
+        const full: number[] = new Array(horizon + 1);
+        let j = 0;
+        for (let d = 0; d <= horizon; d++) {
+          if (j + 1 < pDays.length && d >= pDays[j + 1]) j++;
+          if (d <= pDays[0]) { full[d] = sparse[0]; continue; }
+          if (j + 1 >= pDays.length) { full[d] = sparse[sparse.length - 1]; continue; }
+          const t = (d - pDays[j]) / (pDays[j + 1] - pDays[j]);
+          full[d] = sparse[j] + t * (sparse[j + 1] - sparse[j]);
+        }
+        return full;
+      };
+
       setResult({
         paths: (data.samplePaths || []).map((values: number[]) => ({ values })),
         finalValues: data.finalValues,
         metrics: data.metrics as RiskMetrics,
-        percentilePaths: data.percentilePaths,
+        percentilePaths: { p5: interpFull(serverP5), p50: interpFull(serverP50), p95: interpFull(serverP95) },
       });
-      toast({ title: 'Server Simulation Complete', description: `${simCount} paths computed on server` });
+      const actualCount = data.actualSimCount || simCount;
+      toast({ title: 'Server Simulation Complete', description: `${actualCount} paths computed on server` });
     } catch (err) {
       console.error(err);
       toast({ title: 'Server error', description: 'Falling back to client simulation', variant: 'destructive' });
