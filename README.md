@@ -1,209 +1,183 @@
-QuantEdge 📊
+# QuantEdge 📊  
+> Quantitative Portfolio Intelligence Platform for Indian Equity Investors  
 
-Quantitative Portfolio Intelligence Platform for Indian Equity Investors
-
-🌍 Live Demo:
+🌍 **Live Demo:**  
 https://srinivaskoushik3.github.io/indian-quant-hub/
 
-📌 Overview
+---
 
-QuantEdge is a full-stack quantitative portfolio analytics platform designed for Indian equity investors.
+## 📌 Overview
 
-It combines:
+&nbsp;&nbsp;&nbsp;&nbsp;QuantEdge is a full-stack quantitative portfolio analytics platform designed for Indian equity investors.
 
-Algorithmic trading signals
+&nbsp;&nbsp;&nbsp;&nbsp;It combines:
 
-Portfolio risk modeling
+- Algorithmic trading signals  
+- Portfolio risk modeling  
+- Allocation intelligence  
+- Dividend tracking  
+- Capital gains tax estimation  
+- Monte Carlo risk simulation  
+- Weekly performance reporting  
 
-Allocation intelligence
+&nbsp;&nbsp;&nbsp;&nbsp;The platform bridges quantitative finance with modern fintech UI/UX to deliver institutional-grade analytics in a retail-friendly interface.
 
-Dividend tracking
+---
 
-Capital gains tax estimation
+## 🧠 Core Modules
 
-Monte Carlo risk simulation
+### 📊 Portfolio Dashboard
 
-Weekly performance reporting
+&nbsp;&nbsp;&nbsp;&nbsp;Features:
 
-The platform bridges quantitative finance with modern fintech UI/UX to deliver institutional-grade analytics in a retail-friendly interface.
+- Live portfolio valuation  
+- PnL tracking  
+- Interactive performance charts  
+- Strategy signal overview  
+- Sharpe ratio  
+- Volatility  
+- Max drawdown  
 
-🧠 Core Modules
-📊 Portfolio Dashboard
+---
 
-Live portfolio valuation
+### 📈 Asset Allocation & Risk Breakdown
 
-PnL tracking
+&nbsp;&nbsp;&nbsp;&nbsp;Analytics includes:
 
-Interactive performance charts
+- Allocation by stock (donut visualization)  
+- Sector exposure analysis  
+- Market-cap distribution  
+- Risk contribution per asset  
+- Diversification score (0–100)  
+- Concentration alerts (>30% exposure)  
 
-Strategy signal overview
+---
 
-Sharpe ratio
+### 🎛 Customizable UX Modes
 
-Volatility
+&nbsp;&nbsp;&nbsp;&nbsp;QuantEdge supports dynamic user modes:
 
-Max drawdown
+- Beginner Mode (simplified analytics)  
+- Pro Mode (advanced quant metrics)  
+- Dark Mode (fintech theme)  
+- Light Mode (minimal layout)  
 
-📈 Asset Allocation & Risk Breakdown
+&nbsp;&nbsp;&nbsp;&nbsp;Users can:
 
-Allocation by stock (donut visualization)
+- Enable/disable widgets  
+- Rearrange dashboard layout  
+- Persist layout preferences  
 
-Sector exposure analysis
+---
 
-Market-cap distribution
+### 📅 Weekly Intelligence Report
 
-Risk contribution per asset
+&nbsp;&nbsp;&nbsp;&nbsp;Automated weekly analytics including:
 
-Diversification score (0–100)
+- Weekly return %  
+- Best & worst performing assets  
+- Sharpe ratio  
+- Volatility trend  
+- Allocation shifts  
+- Strategy summary  
 
-Concentration alerts (>30% exposure)
+&nbsp;&nbsp;&nbsp;&nbsp;Includes:
 
-🎛 Customizable UX Modes
+- Weekly performance chart  
+- Snapshot storage  
+- Historical comparison  
+- PDF export (planned)  
 
-QuantEdge supports dynamic user modes:
+---
 
-Beginner Mode (simplified analytics)
+### 💰 Dividend Tracker
 
-Pro Mode (advanced quant metrics)
+&nbsp;&nbsp;&nbsp;&nbsp;Dividend analytics:
 
-Dark Mode (fintech theme)
+- Dividend yield per stock  
+- Upcoming dividend dates  
+- Year-to-date dividend income  
+- Expected annual dividend projection  
+- Income growth visualization  
 
-Light Mode (minimal layout)
+---
 
-Users can:
+### 🧾 Capital Gains Tax Estimator (India)
 
-Enable/disable widgets
+&nbsp;&nbsp;&nbsp;&nbsp;Tax modeling includes:
 
-Rearrange dashboard layout
+- Short-term capital gains (STCG)  
+- Long-term capital gains (LTCG)  
+- Net profit after tax  
+- Effective tax rate  
+- Tax impact visualization  
 
-Persist layout preferences
+&nbsp;&nbsp;&nbsp;&nbsp;Built using Indian equity taxation rules.
 
-📅 Weekly Intelligence Report
+---
 
-Automated weekly analytics including:
+### 🎲 Monte Carlo Risk Lab (Implemented)
 
-Weekly return %
+&nbsp;&nbsp;&nbsp;&nbsp;QuantEdge includes a probabilistic risk modeling engine.
 
-Best & worst performing assets
+&nbsp;&nbsp;&nbsp;&nbsp;Features:
 
-Sharpe ratio
+- Geometric Brownian Motion (GBM) simulation  
+- 1,000+ simulation paths  
+- Probability distribution of returns  
+- 5th / 50th / 95th percentile projections  
+- Worst-case drawdown estimation  
+- Value at Risk (VaR 95% / 99%)  
+- Conditional VaR (CVaR)  
+- Confidence interval bands  
+- Return histogram visualization  
 
-Volatility trend
+&nbsp;&nbsp;&nbsp;&nbsp;This elevates QuantEdge toward institutional-grade quantitative risk modeling.
 
-Allocation shifts
+---
 
-Strategy summary
+### ⚠ Smart Insights Engine
 
-Includes:
+&nbsp;&nbsp;&nbsp;&nbsp;Automatically detects:
 
-Weekly performance chart
+- Portfolio concentration risk  
+- Sector overexposure  
+- High volatility positions  
+- Underperforming strategies  
+- Rebalance suggestions  
 
-Snapshot storage
+---
 
-Historical comparison
+## 🏗 Architecture
 
-PDF export (planned)
+### Frontend
 
-💰 Dividend Tracker
+- React  
+- TypeScript  
+- Vite  
+- Tailwind CSS  
+- shadcn-ui  
+- TanStack Query  
 
-Dividend yield per stock
+### Backend
 
-Upcoming dividend dates
+- Supabase (PostgreSQL)  
+- Serverless APIs  
+- Risk & simulation utilities  
+- Snapshot storage  
 
-Year-to-date dividend income
+### Deployment
 
-Expected annual dividend projection
+- GitHub Pages (Frontend)  
+- Lovable Cloud  
+- Supabase backend  
 
-Income growth visualization
+---
 
-🧾 Capital Gains Tax Estimator (India)
+## 📂 Project Structure
 
-Short-term capital gains (STCG)
-
-Long-term capital gains (LTCG)
-
-Net profit after tax
-
-Effective tax rate
-
-Tax impact visualization
-
-Built with Indian equity taxation rules in mind.
-
-🎲 Monte Carlo Risk Lab (Implemented)
-
-QuantEdge now includes a Monte Carlo simulation engine for probabilistic risk modeling.
-
-Features:
-
-Geometric Brownian Motion (GBM) simulation
-
-1,000+ simulation paths
-
-Probability distribution of returns
-
-5th / 50th / 95th percentile projections
-
-Worst-case drawdown estimation
-
-Value at Risk (VaR 95% / 99%)
-
-Conditional VaR (CVaR)
-
-Confidence interval bands
-
-Return histogram visualization
-
-This elevates QuantEdge toward institutional-grade quantitative risk modeling.
-
-⚠ Smart Insights Engine
-
-Automatically detects:
-
-Portfolio concentration risk
-
-Sector overexposure
-
-High volatility positions
-
-Underperforming strategies
-
-Rebalance suggestions
-
-🏗 Architecture
-Frontend
-
-React
-
-TypeScript
-
-Vite
-
-Tailwind CSS
-
-shadcn-ui
-
-TanStack Query
-
-Backend
-
-Supabase (PostgreSQL)
-
-Serverless APIs
-
-Risk & simulation utilities
-
-Snapshot storage
-
-Deployment
-
-GitHub Pages (Frontend)
-
-Lovable Cloud
-
-Supabase backend
 ```
-📂 Project Structure
+
 indian-quant-hub/
 │
 ├── src/
@@ -216,50 +190,55 @@ indian-quant-hub/
 ├── supabase/
 ├── package.json
 └── README.md
-```
-🛠 Local Development
-```
-Clone Repository
+
+````
+
+---
+
+## 🛠 Local Development
+
+```bash
 git clone https://github.com/Srinivaskoushik3/indian-quant-hub
 cd indian-quant-hub
-Install Dependencies
 npm install
-Start Development Server
 npm run dev
-```
-🚀 Roadmap
+````
 
-Portfolio risk heatmap
+---
 
-Backend microservices (FastAPI)
+## 🚀 Roadmap
 
-Advanced ML prediction engine
+* Portfolio risk heatmap
+* Backend microservices (FastAPI)
+* Advanced ML prediction engine
+* Scenario stress testing
+* PDF report generation
+* Multi-portfolio support
+* Custom domain deployment
 
-Scenario stress testing
+---
 
-PDF report generation
+## 📈 Vision
 
-Multi-portfolio support
+    QuantEdge aims to democratize quantitative finance tools for retail investors in India.
 
-Custom domain deployment
+    The goal is to:
 
-📈 Vision
+* Bridge institutional-grade risk modeling with retail accessibility
+* Combine data science + financial engineering
+* Provide real-time intelligent portfolio insights
 
-QuantEdge aims to democratize quantitative finance tools for retail investors in India.
+---
 
-The goal is to:
-
-Bridge institutional-grade risk modeling with retail accessibility
-
-Combine data science + financial engineering
-
-Provide real-time intelligent portfolio insights
-
-👨‍💻 Author
+## 👨‍💻 Author
 
 Srinivas Koushik
 Quantitative Developer | Full-Stack Engineer
 
-📄 License
+---
+
+## 📄 License
 
 MIT License
+
+
